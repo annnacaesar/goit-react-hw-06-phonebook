@@ -1,63 +1,44 @@
-import { useState, useEffect} from 'react';
-import { nanoid } from 'nanoid';
+import { AppContainer, Container, TitleMain, Title } from './App.styled';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+import { useSelector, useDispatch } from 'react-redux';
+import { addItem } from '../../redux/contactSlice';
+import { getContact, getFilterWord } from '../../redux/selectors';
 import ContactList from '../ContactList';
 import ContactForm from '../ContactForm';
 import Filter from '../Filter';
-import { AppContainer, Container, TitleMain, Title } from './App.styled';
-import { ToastContainer, toast } from 'react-toastify';
-
-import 'react-toastify/dist/ReactToastify.css';
 
 export const App = () => {
-	const [contacts, setContacts] = useState(
-		() => JSON.parse(window.localStorage.getItem('contacts')) ?? []
-	);
-	const [filter, setFilter] = useState('');
+	const dispatch = useDispatch();
 
-	const deleteContact = id => {
-		setContacts(contacts.filter(contact => contact.id !== id));
-	};
+	const contacts = useSelector(getContact);
+	const filterWord = useSelector(getFilterWord);
 
-	const addContact = (name, number) => {
-		const contact = {
-			id: nanoid(),
-			name,
-			number,
-		};
-
-		const findContact = contacts.find(contact =>
-			contact.name.toLowerCase().includes(name.toLowerCase())
-		);
-
-		findContact
-			? toast.info(`${name} is already in contact`)
-			: setContacts([contact, ...contacts]);
-	};
-
-	const changeFilter = event => {
-		setFilter(event.currentTarget.value);
-	};
-	const isVisibleContacts = () => {
-		const normalizeFilter = filter.toLowerCase();
-
-		if (contacts.length !== 0) {
-			return contacts.filter(contact =>
-				contact.name.toLowerCase().includes(normalizeFilter)
+	const addContact = contactObj => {
+		if (contacts !== []) {
+			const findContact = contacts.find(contact =>
+				contact.name
+					.toLowerCase()
+					.includes(contactObj.name.toLowerCase())
 			);
+			findContact
+				? toast.info(`${contactObj.name} is already in contact`)
+				: dispatch(addItem(contactObj));
 		}
-		return;
 	};
 
-	useEffect(() => {
-		const contacts = window.localStorage.getItem('contacts');
-		const parsedContacts = JSON.parse(contacts);
+	const isVisibleContacts = () => {
+		if (filterWord) {
+			const normalizeFilter = filterWord.toLowerCase();
 
-		if (parsedContacts) setContacts(parsedContacts);
-	}, []);
-
-	useEffect(() => {
-		window.localStorage.setItem('contacts', JSON.stringify(contacts));
-	}, [contacts]);
+			if (contacts.length !== 0) {
+				return contacts.filter(contact =>
+					contact.name.toLowerCase().includes(normalizeFilter)
+				);
+			}
+		}
+		return contacts;
+	};
 
 	return (
 		<AppContainer>
@@ -79,11 +60,8 @@ export const App = () => {
 			</Container>
 			<Container>
 				<Title>Contacts</Title>
-				<Filter filter={filter} onChange={changeFilter} />
-				<ContactList
-					contacts={isVisibleContacts()}
-					onDeleteContact={deleteContact}
-				/>
+				<Filter />
+				<ContactList visibleContacts={isVisibleContacts()} />
 			</Container>
 		</AppContainer>
 	);

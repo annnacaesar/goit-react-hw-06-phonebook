@@ -5,6 +5,7 @@ import {
 	ButtonSubmit,
 	Form,
 } from './ContactForm.styled';
+import { nanoid } from 'nanoid';
 
 const ContactForm = ({ onSubmit }) => {
 	const [name, setName] = useState('');
@@ -15,10 +16,19 @@ const ContactForm = ({ onSubmit }) => {
 		event.currentTarget.name === 'name' ? setName(value) : setNumber(value);
 	};
 
+	const contactObj = (name, number) => {
+		return {
+			id: nanoid(),
+			name,
+			number,
+		};
+	};
+
 	const handleSubmit = event => {
 		event.preventDefault();
 
-		onSubmit(name, number);
+		const contact = contactObj(name, number);
+		onSubmit(contact);
 		reset();
 	};
 
