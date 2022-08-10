@@ -15,16 +15,12 @@ export const App = () => {
 	const filterWord = useSelector(getFilterWord);
 
 	const addContact = contactObj => {
-		if (contacts !== []) {
-			const findContact = contacts.find(contact =>
-				contact.name
-					.toLowerCase()
-					.includes(contactObj.name.toLowerCase())
-			);
-			findContact
-				? toast.info(`${contactObj.name} is already in contact`)
-				: dispatch(addItem(contactObj));
-		}
+		const findContact = contacts.find(contact =>
+			contact.name.toLowerCase().includes(contactObj.name.toLowerCase())
+		);
+		findContact
+			? toast.info(`${contactObj.name} is already in contact`)
+			: dispatch(addItem(contactObj));
 	};
 
 	const isVisibleContacts = () => {
